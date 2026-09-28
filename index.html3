@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Remember the Date</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            background: #0d0f12; /* Dark elegant theme background */
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Georgia', serif;
+            color: #ffffff;
+            padding: 20px;
+        }
+        .header-title {
+            font-size: 2.2rem;
+            margin-bottom: 25px;
+            font-weight: normal;
+            font-style: italic;
+            text-align: center;
+            letter-spacing: 1px;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+        }
+        .card-container {
+            position: relative;
+            width: 320px;
+            height: 480px; /* Tall phone screen aspect ratio layout */
+            background: #16191e;
+            border-radius: 24px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+            overflow: hidden;
+            border: 1px solid #2c323b;
+        }
+        /* Style matches the photo underneath the scratch layer */
+        .card-content {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            padding: 40px 20px;
+            text-align: center;
+            background: radial-gradient(circle at center, #1f242d 0%, #0d0f12 100%);
+        }
+        .top-text {
+            font-size: 1.8rem;
+            font-style: italic;
+            color: #e0e0e0;
+        }
+        /* Golden numeric display box */
+        .date-box {
+            width: 180px;
+            height: 140px;
+            border: 2px solid #d4af37; /* Metallic Gold Border */
+            border-radius: 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: rgba(20, 24, 30, 0.8);
+            box-shadow: 0 0 20px rgba(212, 175, 55, 0.2);
+            position: relative;
+        }
+        .big-day {
+            font-size: 3.5rem;
+            font-weight: bold;
+            color: #ffffff;
+            line-height: 1;
+        }
+        .month-year {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #d4af37; /* Gold text color */
+            margin-top: 5px;
+        }
+        /* Tiny background decorative elements */
+        .heart-decor {
+            position: absolute;
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 0.8rem;
+        }
+        .h1 { top: 15px; left: 20px; }
+        .h2 { bottom: 20px; right: 25px; }
+        .h3 { top: 40px; right: 20px; }
+
+        .bottom-text {
+            font-size: 1.5rem;
+            font-style: italic;
+            color: #b0b5bc;
+        }
+        /* Scratch surface canvas layer overlay */
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            cursor: pointer;
+            z-index: 10;
+            touch-action: none;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Main Outer Title Heading -->
+    <h1 class="header-title">Scratch me</h1>
+
+    <!-- Display Envelope Panel Container -->
+    <div class="card-container" id="cardBox">
+        
+        <!-- The visual layout shown after removing scratch layer -->
+        <div class="card-content">
+            <div class="top-text">Our Special Day</div>
+            
+            <!-- Styled Core Gold Date Container Module -->
+            <div class="date-box">
+                <!-- Floating heart visual anchors matching image -->
+                <span class="heart-decor h1">❤️</span>
+                <span class="heart-decor h2">❤️</span>
+                <span class="heart-decor h3">❤️</span>
+                
+                <div class="big-day">12</div>
+                <div class="month-year">October 2026</div>
+            </div>
+            
+            <div class="bottom-text">The Countdown Begins</div>
+        </div>
+
+        <!-- Upper Scratch Cover Sheet Layer -->
+        <canvas id="scratchCanvas"></canvas>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('scratchCanvas');
+        const ctx = canvas.getContext('2d');
+        const container = document.getElementById('cardBox');
+        let isDrawing = false;
+
+        function initScratchCard() {
+            canvas.width = container.offsetWidth;
+            canvas.height = container.offsetHeight;
+
+            // Matte dark luxury cover wrap mask color
+            ctx.fillStyle = '#232731'; 
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Clean gold label text inside outer canvas layer frame
+            ctx.font = "italic 20px Georgia";
+            ctx.fillStyle = "#d4af37";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillText("✨ Touch to Reveal ✨", canvas.width / 2, canvas.height / 2);
+            
+            ctx.globalCompositeOperation = 'destination-out';
+        }
+
+        function scratch(e) {
+            if (!isDrawing) return;
+            
+            const rect = canvas.getBoundingClientRect();
+            const x = (e.clientX || e.touches.clientX) - rect.left;
+            const y = (e.clientY || e.touches.clientY) - rect.top;
+
+            ctx.lineWidth = 50; // Smooth broad gesture scratch width parameters
+            ctx.lineCap = 'round';
+            ctx.lineTo(x, y);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+        }
+
+        canvas.addEventListener('mousedown', (e) => { isDrawing = true; ctx.beginPath(); scratch(e); });
+        canvas.addEventListener('mousemove', scratch);
+        window.addEventListener('mouseup', () => { isDrawing = false; });
+
+        canvas.addEventListener('touchstart', (e) => { isDrawing = true; ctx.beginPath(); scratch(e); });
+        canvas.addEventListener('touchmove', scratch);
+        window.addEventListener('touchend', () => { isDrawing = false; });
+
+        window.onload = initScratchCard;
+    </script>
+</body>
+</html>
